@@ -1,0 +1,45 @@
+---
+- name: Create a Hello World Deployment with 10000 replicas.
+  k8s:
+    state: present
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        labels:
+          app: hello-node
+        name: hello-node
+        namespace: default
+      spec:
+        replicas: 10000
+        selector:
+          matchLabels:
+            app: hello-node
+        template:
+          metadata:
+            labels:
+              app: hello-node
+          spec:
+            containers:
+            - image: k8s.gcr.io/echoserver:1.4
+              name: echoserver
+
+- name: Create a Load Balancer to expose the deployment.
+  k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        labels:
+          app: hello-node
+        name: hello-node
+        namespace: default
+      spec:
+        ports:
+        - port: 8080
+          protocol: TCP
+          targetPort: 8080
+        selector:
+          app: hello-node
+        type: LoadBalancer

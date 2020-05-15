@@ -1,0 +1,88 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'ASG definition.'
+
+Parameters:
+
+  VpcId:
+    Type: String
+    Description: VPC ID.
+
+  Region:
+    Type: String
+    Default: us-east-1
+    Description: AWS Region for the VPC.
+
+  Subnet:
+    Type: String
+    Description: Subnet in the VPC.
+
+Resources:
+
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: k3s-example
+      GroupDescription: K3s example security group.
+      SecurityGroupEgress:
+        - IpProtocol: '-1'
+          CidrIp: '0.0.0.0/0'
+      # Highly insecure, only for testing!
+      SecurityGroupIngress:
+        - IpProtocol: '-1'
+          CidrIp: '0.0.0.0/0'
+      VpcId: !Ref VpcId
+
+  MasterInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-0f31df35880686b3f
+      KeyName: jeffgeerling_aws
+      InstanceType: c5.2xlarge
+      SecurityGroupIds:
+        - Ref: SecurityGroup
+      SubnetId: !Ref Subnet
+      BlockDeviceMappings:
+        - DeviceName: /dev/sda1
+          Ebs:
+            VolumeSize: 8
+        - DeviceName: /dev/sdm
+          Ebs:
+            VolumeSize: 8
+      Tags:
+        - Key: Name
+          Value: k3s-master
+
+  LaunchConfiguration:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      AssociatePublicIpAddress: true
+      # Debian Buster.
+      ImageId: ami-0f31df35880686b3f
+      SecurityGroups:
+        - Ref: SecurityGroup
+      InstanceType: c5.large
+      KeyName: jeffgeerling_aws
+      BlockDeviceMappings:
+        - DeviceName: "/dev/sdk"
+          Ebs:
+            VolumeSize: '8'
+        - DeviceName: "/dev/sdc"
+          VirtualName: ephemeral0
+
+  AutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      AvailabilityZones:
+        - Fn::Sub: '${Region}a'
+      VPCZoneIdentifier:
+        - !Ref Subnet
+      LaunchConfigurationName:
+        Ref: LaunchConfiguration
+      MinSize: '1'
+      DesiredCapacity: '100'
+      MaxSize: '150'
+      Tags:
+        - Key: Name
+          PropagateAtLaunch: true
+          Value: k3s-node

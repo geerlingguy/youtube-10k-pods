@@ -1,0 +1,35 @@
+---
+- name: Ensure VPC exists via CloudFormation.
+  cloudformation:
+    stack_name: k3s-example-vpc
+    state: present
+    region: "{{ aws_region }}"
+    profile: "{{ aws_profile }}"
+    disable_rollback: false
+    template: cloudformation/vpc.yml
+    template_parameters:
+      Region: "{{ aws_region }}"
+    tags:
+      stack: k3s-example-vpc
+      application: k3s-example
+  register: vpc_info
+
+- name: Add to stack_outputs.
+  set_fact:
+    stack_outputs: "{{ stack_outputs | combine(vpc_info['stack_outputs']) }}"
+
+- name: Ensure k3s Instances exist via CloudFormation.
+  cloudformation:
+    stack_name: k3s-example-instances
+    state: present
+    region: "{{ aws_region }}"
+    profile: "{{ aws_profile }}"
+    disable_rollback: false
+    template: cloudformation/instances.yml
+    template_parameters:
+      Region: "{{ aws_region }}"
+      Subnet: "{{ stack_outputs.Subnet }}"
+      VpcId: "{{ stack_outputs.VpcId }}"
+    tags:
+      stack: k3s-example-instances
+      application: k3s-example

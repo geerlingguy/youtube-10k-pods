@@ -1,0 +1,18 @@
+---
+- hosts: localhost
+  gather_facts: false
+
+  vars:
+    aws_region: us-east-1
+    aws_profile: jeffgeerling
+
+  tasks:
+    - name: Delete CloudFormation stacks.
+      cloudformation:
+        stack_name: "{{ item }}"
+        state: absent
+        region: "{{ aws_region }}"
+        profile: "{{ aws_profile }}"
+      with_items:
+        - k3s-example-instances
+        - k3s-example-vpc

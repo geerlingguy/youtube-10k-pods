@@ -1,0 +1,10 @@
+---
+- hosts: localhost
+  gather_facts: false
+
+  vars_files:
+    - vars/main.yml
+
+  tasks:
+    - include_tasks: tasks/cloudformation.yml
+    - include_tasks: tasks/deploy-pods.yml

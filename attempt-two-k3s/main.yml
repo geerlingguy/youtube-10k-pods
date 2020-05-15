@@ -1,0 +1,12 @@
+---
+- hosts: localhost
+  gather_facts: false
+
+  vars:
+    aws_region: us-east-1
+    aws_profile: jeffgeerling
+    stack_outputs: {}
+
+  tasks:
+    - include_tasks: tasks/cloudformation.yml
+    - include_tasks: tasks/k3s-clone.yml

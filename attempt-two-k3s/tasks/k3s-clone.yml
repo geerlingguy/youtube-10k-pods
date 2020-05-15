@@ -1,0 +1,7 @@
+---
+- name: Clone K3s locally.
+  git:
+    repo: https://github.com/rancher/k3s-ansible.git
+    dest: k3s-ansible
+    version: master
+  failed_when: false
