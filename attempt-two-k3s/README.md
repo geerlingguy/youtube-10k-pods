@@ -5,7 +5,7 @@ This directory contains automation to build a K3s master and 100 node Auto Scali
 To run the Ansible playbook, you need to ensure the following:
 
   - You have [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html) installed. Also make sure to install the `boto` and `openshift` Python libraries.
-  - You have an AWS account, and you have at least 200 available vCPUs in EC2 (so you can run 100 t3.micro instances).
+  - You have an AWS account, and you have at least 200 available vCPUs in EC2 (so you can run 100 c5.large instances).
   - You have an AWS account IAM profile's credentials in `~/.aws/credentials`, and that account has pretty much admin-level permissions (manage VPCs, EC2 instances, ASGs, etc.).
   - You have a Key configured named `jeffgeerling_aws` which you'll use to connect to instances. If you don't have a key named that, you'll have to edit the `asg.yml` CF template... or maybe I'll make it more flexible and configurable someday.
 
